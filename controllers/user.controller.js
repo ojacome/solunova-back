@@ -75,7 +75,7 @@ const login = async (req = request, res = response) => {
 
         res.status(500).json({
             ok: false,
-            msg: 'Error al registrar usuario.'
+            msg: 'Error al iniciar sesion.'
         });
     }
 }
