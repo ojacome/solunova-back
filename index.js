@@ -26,6 +26,7 @@ dbConnection();
 //carpeta pública
 app.use(express.static(www));
 
+app.use( '/api', require('./routes/user.route') );
 
 app.get('*', (req, res) => {
     res.sendFile(`index.html`, { root: www });
