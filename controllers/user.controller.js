@@ -80,8 +80,19 @@ const login = async (req = request, res = response) => {
     }
 }
 
+const getUser = async (req = request, res = response) => {
+    const uid = req.uid;
+    const user = await userModel.findById(uid);
+    user.password = ":(";
+
+    res.status(200).json({
+        ok: true,
+        user
+    })
+} 
 
 module.exports = {
     register,
-    login
+    login,
+    getUser
 }
