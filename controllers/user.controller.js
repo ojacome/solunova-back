@@ -21,12 +21,11 @@ const register = async(req = request, res = response) => {
         const salt = bcrypt.genSaltSync();
         user.password = bcrypt.hashSync( req.body.password, salt );
         
-        const userDB = await user.save();
-        userDB.password = ":(";
+        const userDB = await user.save();        
 
         res.status(201).json({
             ok: true,
-            user: userDB         
+            msg: 'Usuario registrado exitosamente.'     
         });
 
     } catch (error) {
@@ -49,7 +48,7 @@ const login = async (req = request, res = response) => {
         if ( !userDB ) {
             return res.status(400).json({
                 ok: false,
-                msg: 'El correo no se encuentra registrado'
+                msg: 'Las credenciales no son correctas'
             });
         }        
         
