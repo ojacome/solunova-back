@@ -1,7 +1,7 @@
 const { response, request } = require('express');
 const userModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
-
+const {generarJWT} = require('../helpers/jwt.helper')
 
 
 const register = async(req = request, res = response) => {        
@@ -21,12 +21,11 @@ const register = async(req = request, res = response) => {
         const salt = bcrypt.genSaltSync();
         user.password = bcrypt.hashSync( req.body.password, salt );
         
-        const userDB = await user.save();
-        userDB.password = ":(";
+        const userDB = await user.save();        
 
         res.status(201).json({
             ok: true,
-            user: userDB         
+            msg: 'Usuario registrado exitosamente.'     
         });
 
     } catch (error) {
@@ -40,15 +39,59 @@ const register = async(req = request, res = response) => {
 
 }
 
-const login = (req = request, res = response) => {
-    res.status(500).json({
-        ok: false,
-        msg: 'llega'
-    });
+const login = async (req = request, res = response) => {
+    try {        
+        const { email, password } = req.body;
+
+        //verificar si existe usario registrado
+        const userDB = await userModel.findOne({ email });        
+        if ( !userDB ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Las credenciales no son correctas'
+            });
+        }        
+        
+        // Verificar contraseña
+        const validPassword = bcrypt.compareSync( password, userDB.password );
+        if ( !validPassword ) {
+            return res.status(400).json({
+                ok: false,
+                msg: 'Las credenciales no son correctas'
+            });
+        }
+        
+        // Generar el TOKEN - JWT
+        const token = await generarJWT( userDB.id );
+
+        res.status(200).json({
+            ok: true,
+            token        
+        });
+
+    } catch (error) {
+        console.log(error)
+
+        res.status(500).json({
+            ok: false,
+            msg: 'Error al iniciar sesion.'
+        });
+    }
 }
 
+const getUser = async (req = request, res = response) => {
+    const uid = req.uid;
+    const user = await userModel.findById(uid);
+    user.password = ":(";
+
+    res.status(200).json({
+        ok: true,
+        user
+    })
+} 
 
 module.exports = {
     register,
-    login
+    login,
+    getUser
 }
